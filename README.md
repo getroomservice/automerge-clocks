@@ -1,6 +1,6 @@
 # Automerge Clocks
 
-This library contains a set of utilities for implementing an Automerge Network protocol.
+This library contains a set of utilities for implementing your own Automerge network protocol.
 
 ## Install
 
@@ -10,7 +10,7 @@ npm install --save automerge-clocks
 
 ## Usage
 
-An Automerge Network protocol should keep track of the Vector Clock of it's local document as well as the clock (or clocks) of it's peers. For the unfamiliar, a Vector Clock is just an [immutable](https://immutable-js.github.io/immutable-js/docs/#/Map) map of Actors (someone who did something to the document) and a counter of changes they've made to the document (called the `sequence`).
+An Automerge network protocol should keep track of the Vector Clock of it's local document as well as the clock (or clocks) of it's peers. A Vector Clock is an [immutable](https://immutable-js.github.io/immutable-js/docs/#/Map) map of Actors (someone who did something to the document) and a counter of changes they've made to the document (called the `sequence`).
 
 For example, a clock might look like this:
 
@@ -23,7 +23,9 @@ const clock = Map({
 });
 ```
 
-### The TL;DR of the protocol
+If all `seq` counters for all actors in a clock are less than or equal to those another clock, we'll say the first clock is "earlier" than the second. 
+
+### The TL;DR of your protocol
 
 Keep a copy of our clock and their clock. Then, follow these rules:
 
