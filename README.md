@@ -1,101 +1,100 @@
-# Automerge Simple Connection
+# Automerge Clocks
 
-This is a simpler, explicit, and asynchronous version of Automerge's [Connection](https://github.com/automerge/automerge/blob/master/src/connection.js) protocol, which is used to send and receive changes to Automerge documents.
-
-Unlike the original Automerge Connection, this connection:
-
-- Supports asynchronous getting and setting documents however you want
-- Doesn't use hard-to-debug handlers
-- Is written in Typescript
-
-Plus, this connector is interoperable with a peer who's using the original.
+This library contains a set of utilities for implementing an Automerge Network protocol.
 
 ## Install
 
 ```
-npm install --save automerge-simple-connection
+npm install --save automerge-clocks
 ```
 
 ## Usage
 
-### Setting up a Doc Store
+An Automerge Network protocol should keep track of the Vector Clock of it's local document as well as the clock (or clocks) of it's peers. For the unfamiliar, a Vector Clock is just an [immutable](https://immutable-js.github.io/immutable-js/docs/#/Map) map of Actors (someone who did something to the document) and a counter of changes they've made to the document (called the `sequence`).
 
-Async Automerge Connection assumes you're implementing an `AsyncDocStore` class that satisfies this interface:
+For example, a clock might look like this:
 
-```ts
-interface AsyncDocStore {
-  getDoc<T>(docId: string): Promise<Doc<T>>;
-  setDoc<T>(docId: string, doc: Doc<T>): Promise<Doc<T>>;
-}
-```
+```js
+import { Map } from "immutable";
 
-An in-memory example of such a store might just be:
-
-```ts
-import { AsyncDocStore } from "automerge-simple-connection";
-
-class MyDocStore extends AsyncDocStore {
-  _docs = {};
-
-  getDoc(docId) {
-    return _docs[docId];
-  }
-
-  setDoc(docId, doc) {
-    _docs[docId] = doc;
-    return doc;
-  }
-}
-```
-
-### Setting up a sendMsg function
-
-Then, you'll create a `sendMsg` function that takes a message and sends it over the network however you want. For example:
-
-```ts
-function sendMsg(msg) {
-  myNetwork.send(JSON.stringify(msg));
-}
-```
-
-### Creating a connection
-
-Finally, you'd create a `Connection` class and pass both your `AsyncDocStore` and your `sendMsg` function in.
-
-```ts
-import { Connection } from "automerge-simple-connection";
-
-const connection = new Connection(new MyDocStore(), sendMsg);
-```
-
-### Broadcasting changes
-
-To let other clients know a document changed, just call the `docChanged` function:
-
-```ts
-connection.docChanged(myDocId, myDoc);
-```
-
-### Receiving changes
-
-When you've received a message over the wire (like one you might have sent from your `sendMsg` function), you should call `receiveMsg` like so:
-
-```ts
-myNetwork.on("got_message", msg => {
-  connection.receiveMsg(msg);
+const clock = Map({
+  "georges-uuid": 5,
+  "alices-uuid": 10
 });
 ```
 
-This will update the document store as needed. If you need to wait for that to complete, the function is asynchronous:
+### The TL;DR of the protocol
 
-```ts
-myNetwork.on("got_message", async msg => {
-  await connection.receiveMsg(msg);
-});
+Keep a copy of our clock and their clock. Then, follow these rules:
+
+- If `theirClock` is "earlier" than `ourClock`, then send changes.
+- If `ourClock` is "earlier" than `theirClock`, then ask for changes.
+
+### The building blocks
+
+#### `getClock`
+
+All Automerge documents have a clock. `automerge-clocks` has a built-in helper to get the current clock:
+
+```js
+import { getClock } from "automerge-clocks";
+import { init } from "automerge";
+
+const myDoc = init();
+const clock = getClock(myDoc); // hurray it's a clock!
 ```
 
-## Why?
+#### `earlier`
 
-The goal of this library is to decouple Automerge Connection from DocSet, so you don't have to load every document into memory. That makes it easier to run a peer that offloads documents into a cache or database.
+To check if one clock is earlier than another, use `earlier`:
 
-Because it doesn't use DocSets, it also doesn't use the handler pattern the original Automerge Connection uses. That makes debugging a lot easier since there's less "magic" about when things are sent across the wire.
+```js
+import { earlier } from "automerge-clocks";
+
+const shouldSendChanges = earlier(theirClock, ourClock);
+```
+
+#### `recentChanges`
+
+Given `theirClock` and our current document, get the changes we'd need to send in order to update the peer to where we are.
+
+```js
+import { recentChanges } from "automerge-clocks";
+
+const changes = recentChanges(ourDoc, theirClock);
+MyNetwork.send(changes);
+```
+
+If ourDoc is `earlier` than `theirClock`, `recentChanges` will return `[]`.
+
+```js
+const changes = recentChanges(superOldDoc, superNewClock);
+changes == []; // Nothing to update!
+```
+
+#### `union`
+
+To combine clocks, use `union`:
+
+```js
+import { union } from "automerge-clocks";
+
+union(ourClock, theirClock);
+```
+
+You should use this after you make a change and send it to a peer. For example:
+
+```js
+import { union, recentChanges, getClock } from "automerge-clocks";
+
+// Make changes and send them to the network
+const newDoc = Automerge.change(ourDoc, d => {
+  d.name = "new-name";
+});
+const changes = recentChanges(newDoc, theirClock);
+MyNetwork.send(changes);
+
+// use `union` to optimisticly update theirClock
+// with what we just sent them
+theirClock = union(theirClock, getClock(newDoc));
+```

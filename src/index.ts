@@ -44,19 +44,23 @@ export function getClock(doc: Automerge.Doc<any>): Clock {
 }
 
 /**
- * Get the changes required to get a document up to date
- * with a remote clock.
+ * Given someone else's clock, get the changes
+ * we need to update them, to the best of our
+ * knowledge.
+ *
+ * Returns an empty array if our document is older
+ * than the clock we're given.
  * @param doc
- * @param clock
+ * @param theirClock
  */
-export function changesFrom(
+export function recentChanges(
   doc: Automerge.Doc<any>,
-  remoteClock: Clock
+  theirClock: Clock
 ): Automerge.Change[] {
   const state = Frontend.getBackendState(doc);
 
   // @ts-ignore because automerge has bad typings
-  const cl: Automerge.Clock = remoteClock;
+  const cl: Automerge.Clock = theirClock;
 
   return Backend.getMissingChanges(state, cl);
 }
