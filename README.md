@@ -100,3 +100,6 @@ MyNetwork.send(changes);
 // with what we just sent them
 theirClock = union(theirClock, getClock(newDoc));
 ```
+
+# License
+MIT
