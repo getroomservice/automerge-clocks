@@ -20,16 +20,16 @@ export function union(clock1: Clock, clock2: Clock): Clock {
 }
 
 /**
- * Returns true if the first clock is earlier than the second clock.
+ * Returns true if the first clock is later than the second clock
  * @param clock1
  * @param clock2
  */
-export function earlier(clock1: Clock, clock2: Clock): boolean {
+export function later(clock1: Clock, clock2: Clock): boolean {
   return clock1
     .keySeq()
     .concat(clock2.keySeq())
     .reduce(
-      (result, key) => result && clock1.get(key, 0) <= clock2.get(key, 0),
+      (result, key) => result && clock1.get(key, 0) > clock2.get(key, 0),
       true
     );
 }

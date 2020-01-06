@@ -44,14 +44,14 @@ const myDoc = init();
 const clock = getClock(myDoc); // hurray it's a clock!
 ```
 
-#### `earlier`
+#### `later`
 
-To check if one clock is earlier than another, use `earlier`:
+To check if one clock is earlier than another, use `later`:
 
 ```js
-import { earlier } from "automerge-clocks";
+import { later } from "automerge-clocks";
 
-const shouldSendChanges = earlier(theirClock, ourClock);
+const shouldSendChanges = later(ourClock, theirClock);
 ```
 
 #### `recentChanges`

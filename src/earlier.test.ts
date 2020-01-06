@@ -1,8 +1,8 @@
 import { Map } from "immutable";
-import { earlier } from "./index";
+import { later } from "./index";
 
-test("earlier returns true if the clock is earlier in the simple case", () => {
-  const isEarlier = earlier(
+test("later returns false if the clock is later in the simple case", () => {
+  const islater = later(
     Map({
       george: 1
     }),
@@ -10,11 +10,11 @@ test("earlier returns true if the clock is earlier in the simple case", () => {
       george: 2
     })
   );
-  expect(isEarlier).toBe(true);
+  expect(islater).toBe(false);
 });
 
-test("earlier returns false in the simple case", () => {
-  const isEarlier = earlier(
+test("later returns true in the simple case", () => {
+  const islater = later(
     Map({
       bob: 5
     }),
@@ -22,11 +22,11 @@ test("earlier returns false in the simple case", () => {
       bob: 1
     })
   );
-  expect(isEarlier).toBe(false);
+  expect(islater).toBe(true);
 });
 
-test("earlier returns false if not all actors are earlier ", () => {
-  const isEarlier = earlier(
+test("later returns false if not all actors are later ", () => {
+  const islater = later(
     Map({
       george: 1,
       bob: 2
@@ -36,5 +36,5 @@ test("earlier returns false if not all actors are earlier ", () => {
       bob: 1
     })
   );
-  expect(isEarlier).toBe(false);
+  expect(islater).toBe(false);
 });
