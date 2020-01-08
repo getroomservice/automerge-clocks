@@ -1,5 +1,5 @@
 import Automerge, { Backend, Frontend } from "automerge";
-import { Map } from "immutable";
+import { isImmutable, Map } from "immutable";
 
 type Clock = Map<string, number>;
 
@@ -57,6 +57,15 @@ export function recentChanges(
   doc: Automerge.Doc<any>,
   theirClock: Clock
 ): Automerge.Change[] {
+  // This is a really common bug that happens when people incorrectly
+  // assume that something they got from the network is already converted
+  // into an immutable obj.
+  if (!isImmutable(theirClock)) {
+    throw new Error(
+      "theirClock is not an Immutable.js object, but it should be. You may be passing in a JSON map instead."
+    );
+  }
+
   const state = Frontend.getBackendState(doc);
 
   // @ts-ignore because automerge has bad typings
