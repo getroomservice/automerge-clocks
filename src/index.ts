@@ -25,13 +25,13 @@ export function union(clock1: Clock, clock2: Clock): Clock {
  * @param clock2
  */
 export function later(clock1: Clock, clock2: Clock): boolean {
-  return clock1
-    .keySeq()
-    .concat(clock2.keySeq())
-    .reduce(
-      (result, key) => result && clock1.get(key, 0) > clock2.get(key, 0),
-      true
-    );
+  const keys = clock1.keySeq().concat(clock2.keySeq());
+
+  for (let key of keys) {
+    if (clock1.get(key, -1) > clock2.get(key, -1)) return true;
+  }
+
+  return false;
 }
 
 /**

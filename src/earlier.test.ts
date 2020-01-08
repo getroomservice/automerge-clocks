@@ -25,7 +25,33 @@ test("later returns true in the simple case", () => {
   expect(islater).toBe(true);
 });
 
-test("later returns false if not all actors are later ", () => {
+test("later returns true in the complex case", () => {
+  const islater = later(
+    Map({
+      bob: 8,
+      george: 19
+    }),
+    Map({
+      bob: 8,
+      george: 18
+    })
+  );
+  expect(islater).toBe(true);
+});
+
+test("clocks that are the same are not later", () => {
+  const islater = later(
+    Map({
+      bob: 1
+    }),
+    Map({
+      bob: 1
+    })
+  );
+  expect(islater).toBe(false);
+});
+
+test("If any actor is later, then it's later.", () => {
   const islater = later(
     Map({
       george: 1,
@@ -36,5 +62,5 @@ test("later returns false if not all actors are later ", () => {
       bob: 1
     })
   );
-  expect(islater).toBe(false);
+  expect(islater).toBe(true);
 });
