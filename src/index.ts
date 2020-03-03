@@ -1,5 +1,5 @@
 import Automerge, { Backend, Frontend } from "automerge";
-import { isImmutable, Map } from "immutable";
+import { Map } from "immutable";
 
 type Clock = Map<string, number>;
 
@@ -60,7 +60,12 @@ export function recentChanges(
   // This is a really common bug that happens when people incorrectly
   // assume that something they got from the network is already converted
   // into an immutable obj.
-  if (!isImmutable(theirClock)) {
+  if (
+    // We're doing some duck typing here bc automerge doesn't use the newest
+    // verison of immutable and we're trying to stick with it.
+    !theirClock.toOrderedSet ||
+    typeof theirClock.toOrderedSet !== "function"
+  ) {
     throw new Error(
       "theirClock is not an Immutable.js object, but it should be. You may be passing in a JSON map instead."
     );
