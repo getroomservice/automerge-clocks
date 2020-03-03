@@ -27,6 +27,7 @@ export function union(clock1: Clock, clock2: Clock): Clock {
 export function later(clock1: Clock, clock2: Clock): boolean {
   const keys = clock1.keySeq().concat(clock2.keySeq());
 
+  // @ts-ignore
   for (let key of keys) {
     if (clock1.get(key, -1) > clock2.get(key, -1)) return true;
   }

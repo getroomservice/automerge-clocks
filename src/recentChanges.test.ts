@@ -15,7 +15,7 @@ test("changesFrom will add changes for an empty remote clock", () => {
 });
 
 test("changesFrom gets the differences from a document", () => {
-  const oldDoc = from({ name: "alpha" });
+  const oldDoc = from<{ name: string }>({ name: "alpha" });
   const newDoc = change(oldDoc, doc => {
     doc.name = "beta";
   });
@@ -31,7 +31,7 @@ test("changesFrom gets the differences from a document", () => {
 });
 
 test("changesFrom returns no changes if our document is older than the clock they gave us", () => {
-  const oldDoc = from({ name: "alpha" });
+  const oldDoc = from<{ name: string }>({ name: "alpha" });
   const newDoc = change(oldDoc, doc => {
     doc.name = "beta";
   });
