@@ -17,12 +17,12 @@
     "immutable": "^3.8.2"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.24",
-    "automerge": "^0.13.0",
-    "immutable": "^3.8.2",
-    "jest": "^24.9.0",
-    "ts-jest": "^24.2.0",
-    "typescript": "^3.7.4"
+    "@types/jest": "^25.2.1",
+    "automerge": "^0.14.0",
+    "immutable": "^4.0.0-rc.12",
+    "jest": "^25.3.0",
+    "ts-jest": "^25.3.1",
+    "typescript": "^3.8.3"
   },
   "types": "dist/index.d.ts"
 }
